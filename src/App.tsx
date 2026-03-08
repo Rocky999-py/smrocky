@@ -30,10 +30,14 @@ import {
   EyeOff,
   Layout,
   Linkedin,
-  Twitter,
-  Globe,
-  Server,
-  Database
+  Twitter, 
+  Globe, 
+  Server, 
+  Database,
+  MessageSquare,
+  MessageCircle,
+  SendHorizontal,
+  Bot
 } from 'lucide-react';
 import { 
   PERSONAL_INFO, 
@@ -43,9 +47,10 @@ import {
   PROJECTS, 
   EXPERIENCE 
 } from './constants';
+import { GoogleGenAI } from "@google/genai";
 
 const ICON_MAP: Record<string, any> = {
-  Menu, X, Moon, Sun, ChevronRight, Download, Send, ArrowUp, Search, ExternalLink, Mail, Phone, MapPin, Code2, Cpu, User, GraduationCap, Briefcase, Github, Save, Plus, Trash2, Settings, Lock, Eye, EyeOff, Layout, Linkedin, Twitter, Globe, Server, Database, ImageIcon
+  Menu, X, Moon, Sun, ChevronRight, Download, Send, ArrowUp, Search, ExternalLink, Mail, Phone, MapPin, Code2, Cpu, User, GraduationCap, Briefcase, Github, Save, Plus, Trash2, Settings, Lock, Eye, EyeOff, Layout, Linkedin, Twitter, Globe, Server, Database, ImageIcon, MessageSquare, MessageCircle, SendHorizontal, Bot
 };
 
 const Icon = ({ name, ...props }: { name: string | any, [key: string]: any }) => {
@@ -944,6 +949,153 @@ const Footer = ({ data }: { data: any }) => {
   );
 };
 
+const Chatbot = ({ data }: { data: any }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
+    { role: 'model', text: `Hi! I'm Rocky's AI assistant. How can I help you today?` }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+    
+    const userMessage = { role: 'user', text: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [...messages, userMessage].map(m => ({
+          role: m.role,
+          parts: [{ text: m.text }]
+        })),
+        config: {
+          systemInstruction: `You are an AI assistant for Shah Md Rakybujjaman Rocky (known as Rocky). 
+          Rocky is a 28-year-old Computer Science Engineer from Bangladesh.
+          He graduated from Pundra University of Science and Technology.
+          His skills and background: ${JSON.stringify(data)}.
+          Be professional, helpful, and concise. Answer questions about Rocky's work, skills, and background. 
+          If you don't know something, suggest contacting Rocky directly via the contact form or WhatsApp (+8801300172795).`
+        }
+      });
+
+      const aiText = response.text || "I'm sorry, I couldn't process that.";
+      setMessages(prev => [...prev, { role: 'model', text: aiText }]);
+    } catch (error) {
+      console.error("Chatbot error:", error);
+      setMessages(prev => [...prev, { role: 'model', text: "Sorry, I'm having trouble connecting right now." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
+      {/* WhatsApp Button */}
+      <motion.a
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        href="https://wa.me/8801300172795"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-14 h-14 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-emerald-600 transition-colors"
+      >
+        <MessageCircle size={30} />
+      </motion.a>
+
+      {/* Chatbot Toggle */}
+      <div className="relative">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="absolute bottom-20 right-0 w-[350px] max-w-[calc(100vw-48px)] h-[500px] glass rounded-[32px] shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800"
+            >
+              {/* Header */}
+              <div className="p-6 bg-primary text-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <Bot size={24} />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">Rocky AI</p>
+                    <p className="text-[10px] opacity-80 uppercase tracking-widest font-bold">Online Assistant</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsOpen(false)} className="hover:rotate-90 transition-transform">
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-medium ${
+                      msg.role === 'user' 
+                        ? 'bg-primary text-white rounded-tr-none' 
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-tl-none'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none">
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50">
+                <div className="relative">
+                  <input 
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                    placeholder="Ask me about Rocky..."
+                    className="w-full pl-6 pr-14 py-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-bold"
+                  />
+                  <button 
+                    onClick={handleSend}
+                    disabled={isLoading}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50"
+                  >
+                    <SendHorizontal size={18} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-16 h-16 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-primary-dark transition-colors"
+        >
+          {isOpen ? <X size={30} /> : <MessageSquare size={30} />}
+        </motion.button>
+      </div>
+    </div>
+  );
+};
+
 // --- Dashboard Component ---
 
 const DashboardModal = ({ 
@@ -1594,6 +1746,7 @@ export default function App() {
       </main>
 
       <Footer data={portfolioData.personalInfo} />
+      <Chatbot data={portfolioData} />
 
       <AnimatePresence>
         {showPinModal && (
