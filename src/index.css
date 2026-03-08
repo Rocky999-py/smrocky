@@ -1,12 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
+  --font-brand: "Space Grotesk", sans-serif;
   
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
 }
 
 @layer base {
@@ -15,7 +16,7 @@
   }
   
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-white text-slate-900 antialiased overflow-x-hidden;
   }
   
   .dark body {
@@ -24,6 +25,19 @@
 }
 
 @layer components {
+  .animated-bg {
+    @apply fixed inset-0 -z-10 overflow-hidden pointer-events-none;
+    background: radial-gradient(circle at 50% 50%, #f8fafc 0%, #ffffff 100%);
+  }
+
+  .dark .animated-bg {
+    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+  }
+
+  .blob {
+    @apply absolute rounded-full blur-[120px] opacity-30 mix-blend-multiply dark:mix-blend-soft-light animate-pulse;
+  }
+
   .section-padding {
     @apply py-24 px-6 md:px-12 lg:px-24;
   }
@@ -45,7 +59,7 @@
   }
 
   .glass {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/50;
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50;
   }
 
   .icon-box {
