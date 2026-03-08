@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+  
+  .dark body {
+    @apply bg-slate-950 text-slate-50;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-24 px-6 md:px-12 lg:px-24;
+  }
+  
+  .container-width {
+    @apply max-w-7xl mx-auto;
+  }
+  
+  .heading-lg {
+    @apply font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9];
+  }
+  
+  .heading-md {
+    @apply font-display text-4xl md:text-5xl font-semibold tracking-tight;
+  }
+  
+  .text-muted {
+    @apply text-slate-600 dark:text-slate-400;
+  }
+
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-800/50;
+  }
+
+  .icon-box {
+    @apply p-4 rounded-2xl bg-white dark:bg-slate-900 shadow-lg shadow-primary/5 border border-slate-100 dark:border-slate-800 flex items-center justify-center transition-all duration-300;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
